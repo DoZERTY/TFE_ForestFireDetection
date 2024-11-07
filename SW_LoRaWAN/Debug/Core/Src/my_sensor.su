@@ -1,0 +1,7 @@
+../Core/Src/my_sensor.c:28:22:bme68x_i2c_read	32	static
+../Core/Src/my_sensor.c:34:22:bme68x_i2c_write	32	static
+../Core/Src/my_sensor.c:40:6:bme68x_delay_us	0	static
+../Core/Src/my_sensor.c:66:6:bme68x_check_rslt	8	static
+../Core/Src/my_sensor.c:100:6:my_sensor_init	16	static
+../Core/Src/my_sensor.c:142:6:print_data_bme	32	static
+../Core/Src/my_sensor.c:163:21:get_BME_data	40	static

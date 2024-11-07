@@ -1,0 +1,2 @@
+../Core/Src/utils.c:17:6:start_cycle_count	8	static,ignoring_inline_asm
+../Core/Src/utils.c:32:6:stop_cycle_count	24	static

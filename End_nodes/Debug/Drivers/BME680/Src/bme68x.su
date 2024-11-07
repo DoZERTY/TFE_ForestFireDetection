@@ -1,0 +1,17 @@
+../Drivers/BME680/Src/bme68x.c:846:17:calc_pressure	8	static
+../Drivers/BME680/Src/bme68x.c:892:17:calc_humidity	16	static
+../Drivers/BME680/Src/bme68x.c:1358:15:set_mem_page	24	static
+../Drivers/BME680/Src/bme68x.c:178:8:bme68x_set_regs.constprop	48	static
+../Drivers/BME680/Src/bme68x.c:144:8:bme68x_init	64	static
+../Drivers/BME680/Src/bme68x.c:178:8:bme68x_set_regs	72	static
+../Drivers/BME680/Src/bme68x.c:235:8:bme68x_get_regs	32	static
+../Drivers/BME680/Src/bme68x.c:270:8:bme68x_soft_reset	24	static
+../Drivers/BME680/Src/bme68x.c:395:8:bme68x_get_conf	32	static
+../Drivers/BME680/Src/bme68x.c:430:8:bme68x_set_op_mode	24	static
+../Drivers/BME680/Src/bme68x.c:311:8:bme68x_set_conf	72	static
+../Drivers/BME680/Src/bme68x.c:467:8:bme68x_get_op_mode	32	static
+../Drivers/BME680/Src/bme68x.c:490:10:bme68x_get_meas_dur	16	static
+../Drivers/BME680/Src/bme68x.c:540:8:bme68x_get_data	376	static
+../Drivers/BME680/Src/bme68x.c:630:8:bme68x_set_heatr_conf	120	static
+../Drivers/BME680/Src/bme68x.c:687:8:bme68x_get_heatr_conf	40	static
+../Drivers/BME680/Src/bme68x.c:725:8:bme68x_selftest_check	328	static

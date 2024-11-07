@@ -1,0 +1,2 @@
+../Core/Src/utils.c:17:6:start_cycle_count	3
+../Core/Src/utils.c:32:6:stop_cycle_count	1

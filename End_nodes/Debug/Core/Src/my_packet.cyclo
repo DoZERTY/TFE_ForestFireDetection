@@ -1,0 +1,5 @@
+../Core/Src/my_packet.c:24:6:make_packet	1
+../Core/Src/my_packet.c:56:6:send_packet	2
+../Core/Src/my_packet.c:73:6:send_dummy_packet	2
+../Core/Src/my_packet.c:82:6:send_sync_packet	4
+../Core/Src/my_packet.c:101:6:decode_print_packet	4

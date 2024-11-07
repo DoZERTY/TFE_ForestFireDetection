@@ -1,0 +1,7 @@
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:324:14:lr_fhss_get_hop_sequence_count	3
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:334:6:lr_fhss_process_parameters	7
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:349:16:lr_fhss_get_hop_params	18
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:426:10:lr_fhss_get_next_state	5
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:448:9:lr_fhss_get_next_freq_in_grid	6
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:480:10:lr_fhss_build_frame	28
+../Middlewares/Third_Party/SubGHz_Phy/stm32_radio_driver/lr_fhss_mac.c:589:10:lr_fhss_get_time_on_air_in_ms	6

@@ -1,0 +1,12 @@
+../Core/Src/main.c:231:6:SystemClock_Config	112	static,ignoring_inline_asm
+../Core/Src/main.c:92:5:main	8	static
+../Core/Src/main.c:279:6:print_now	8	static
+../Core/Src/main.c:285:6:print_int	16	static
+../Core/Src/main.c:302:6:print_error	16	static
+../Core/Src/main.c:307:6:blink	8	static
+../Core/Src/main.c:315:6:HAL_GPIO_EXTI_Callback	8	static
+../Core/Src/main.c:384:6:HAL_RTCEx_WakeUpTimerEventCallback	0	static
+../Core/Src/main.c:399:5:change_SF	16	static
+../Core/Src/main.c:412:5:change_power	8	static
+../Core/Src/main.c:422:6:debug_print	0	static
+../Core/Src/main.c:435:6:Error_Handler	0	static,ignoring_inline_asm

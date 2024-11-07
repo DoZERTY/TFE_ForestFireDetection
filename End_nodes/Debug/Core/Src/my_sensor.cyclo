@@ -1,0 +1,10 @@
+../Core/Src/my_sensor.c:31:22:bme68x_i2c_read	1
+../Core/Src/my_sensor.c:37:22:bme68x_i2c_write	1
+../Core/Src/my_sensor.c:43:6:bme68x_delay_us	1
+../Core/Src/my_sensor.c:69:6:bme68x_check_rslt	1
+../Core/Src/my_sensor.c:103:6:my_sensor_init	2
+../Core/Src/my_sensor.c:145:6:print_data_bme	2
+../Core/Src/my_sensor.c:166:6:my_sensor_init_test_temp	2
+../Core/Src/my_sensor.c:208:6:my_sensor_init_test_dur	2
+../Core/Src/my_sensor.c:250:21:get_BME_data	1
+../Core/Src/my_sensor.c:278:8:compute_FWI	1

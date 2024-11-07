@@ -1,0 +1,8 @@
+../Core/Src/FWI.c:17:6:FWI_init	1
+../Core/Src/FWI.c:44:8:FFMCcalc	7
+../Core/Src/FWI.c:105:8:DMCcalc	7
+../Core/Src/FWI.c:148:8:DCcalc	5
+../Core/Src/FWI.c:181:8:ISIcalc	1
+../Core/Src/FWI.c:197:8:BUIcalc	3
+../Core/Src/FWI.c:214:8:FWIcalc	3
+../Core/Src/FWI.c:237:7:print_FWI	1

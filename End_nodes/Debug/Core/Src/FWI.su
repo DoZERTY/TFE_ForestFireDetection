@@ -1,0 +1,8 @@
+../Core/Src/FWI.c:17:6:FWI_init	8	static
+../Core/Src/FWI.c:44:8:FFMCcalc	72	static
+../Core/Src/FWI.c:105:8:DMCcalc	48	static
+../Core/Src/FWI.c:148:8:DCcalc	40	static
+../Core/Src/FWI.c:181:8:ISIcalc	32	static
+../Core/Src/FWI.c:197:8:BUIcalc	40	static
+../Core/Src/FWI.c:214:8:FWIcalc	32	static
+../Core/Src/FWI.c:237:7:print_FWI	56	static
