@@ -20,62 +20,94 @@ void FWI_init(void){
     dc0 = 15.0; /* FFMC, DMC, and DC initialization */
 }
 
+/* Functions used to reduce the number of cycles */
+
+static inline double fast_exp_neg(double x) {
+    return 1.0 / (1.0 + x + 0.5 * x * x);
+}
+
+static inline double fastPow(double a, double b) {
+    union {
+        double d;
+        int x[2];
+
+    } u = { a };
+    u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+    u.x[0] = 0;
+    return u.d;
+}
+
+static inline double fast_exp(double x) {
+    return fastPow(2.718281828459045, x);
+}
 /* FFMC calculation */
 double FFMCcalc(double T, double H, double W, double Ro, double Fo)
 {
-    double ffmc;
-    double Mo, Rf, Mr, Ed, Ew, Ko, Kd, Kl, Kw, M, F;
-    Mo = 147.2 * (101. - Fo) / (59.5 + Fo); /*Eq. 1 in */
+    double ffmc, Mo, Rf, Mr, Ed, Ew, Ko, Kd, Kl, Kw, M;
+    double H100 = H / 100.0;
+    double Hcomp = (100.0 - H) / 100.0;
+
+    Mo = 147.2 * (101.0 - Fo) / (59.5 + Fo);
+
+    // Eq 2
     if (Ro > 0.5)
-    {                  /*van Wagner and Pickett (1985) */
-        Rf = Ro - 0.5; /*Eq. 2*/
-        if (Mo <= 150.)
-            Mr = Mo +
-                 42.5 * Rf * (exp(-100. / (251. - Mo))) * (1 - exp(-6.93 / Rf)); /*Eq. 3a*/
-        else
-            Mr = Mo +
-                 42.5 * Rf * (exp(-100. / (251. - Mo))) * (1 - exp(-6.93 / Rf)) +
-                 .0015 * pow(Mo - 150., 2.) * pow(Rf, .5); /*Eq. 3b*/
-        if (Mr > 250.)
-            Mr = 250.;
-        Mo = Mr;
+    {
+        Rf = Ro - 0.5;
+        double expTerm = fast_exp_neg(100.0 / (251.0 - Mo));
+        double expRf = fast_exp_neg(6.93 / Rf);
+        double baseMr = 42.5 * Rf * expTerm * (1 - expRf);
+
+        if (Mo <= 150.0) {
+            Mr = Mo + baseMr;  // Eq 3a
+        } else {
+            Mr = Mo + baseMr + 0.0015 * (Mo - 150.0) * (Mo - 150.0) * sqrt(Rf);  // Eq 3b opti
+        }
+
+        Mo = (Mr > 250.0) ? 250.0 : Mr;
     }
-    Ed = 0.942 * pow(H, .679) + 11. * exp((H - 100.) / 10.) + .18 * (21.1 - T) * (1. - exp(-.115 * H)); /*Eq. 4*/
+
+    // Eq 4 (Ed)
+    Ed = 0.942 * fastPow(H, 0.679) + 11.0 * fast_exp_neg(-(H - 100.0) / 10.0) + 0.18 * (21.1 - T) * (1.0 - fast_exp_neg(0.115 * H));
+
     if (Mo > Ed)
     {
-        Ko = 0.424 * (1. - pow(H / 100., 1.7)) + 0.0694 * pow(W, .5) * (1. - pow(H / 100., 8.)); /*Eq. 6a*/
-        Kd = Ko * .581 * exp(0.0365 * T);                                                        /*Eq. 6b*/
-        M = Ed + (Mo - Ed) * pow(10., -Kd);                                                      /*Eq. 8*/
+        // Eq 6a et 6b opti
+        double powH17 = fastPow(H100, 1.7);
+        Ko = 0.424 * (1.0 - powH17) + 0.0694 * sqrt(W) * (1.0 - fastPow(H100, 8));
+        Kd = Ko * 0.581 * fast_exp(0.0365 * T);
+        M = Ed + (Mo - Ed) * fastPow(10.0, -Kd);
     }
     else
     {
-        Ew = 0.618 * pow(H, .753) + 10. * exp((H - 100.) / 10.) + .18 * (21.1 - T) * (1. - exp(-.115 * H)); /*Eq. 5*/
+        // Eq 5 (Ew)
+        Ew = 0.618 * fastPow(H, 0.753) + 10.0 * fast_exp((H - 100.0) / 10.0) + 0.18 * (21.1 - T) * (1.0 - fast_exp_neg(0.115 * H));
+
         if (Mo < Ew)
         {
-            Kl = 0.424 * (1. - pow((100. - H) / 100., 1.7)) + 0.0694 * pow(W, .5) * (1 - pow((100. - H) / 100., 8.)); /*Eq. 7a*/
-            Kw = Kl * .581 * exp(0.0365 * T);                                                                         /*Eq. 7b*/
-            M = Ew - (Ew - Mo) * pow(10., -Kw);                                                                       /*Eq. 9*/
+            // Eq 7a et 7b opti
+            double powHc17 = fastPow(Hcomp, 1.7);
+            Kl = 0.424 * (1.0 - powHc17) + 0.0694 * sqrt(W) * (1.0 - fastPow(Hcomp, 8));
+            Kw = Kl * 0.581 * fast_exp(0.0365 * T);
+            M = Ew - (Ew - Mo) * fastPow(10.0, -Kw);
         }
         else
+        {
             M = Mo;
+        }
     }
-    ffmc = 59.5 * (250. - M) / (147.2 + M); /*Eq. 10*/
-    if (ffmc > 101.0)
-        ffmc = 101.0;
-    
-    return ffmc;
+
+    // Eq 10
+    ffmc = 59.5 * (250.0 - M) / (147.2 + M);
+    return (ffmc > 101.0) ? 101.0 : ffmc;
 }
 
 /* DMC calculation */
 double DMCcalc(double T, double H, double Ro, double Po, int I)
 {
     double dmc;
-    double Re, Mo, Mr, K, B, P, Pr;
+    double Re, Mo, Mr, K, B, Pr;
     
-    if (T >= -1.1)
-        K = 1.894 * (T + 1.1) * (100. - H) * Le[I - 1] * 0.0001;       // 10^-4 instead of 10^-6
-    else
-        K = 0.;
+    K = (T >= -1.1) ? (1.894 * (T + 1.1) * (100.0 - H) * Le[I - 1] * 0.0001) : 0.0;
     /*Eq. 16*/
     /*Eq. 17*/
     if (Ro <= 1.5)
@@ -83,8 +115,7 @@ double DMCcalc(double T, double H, double Ro, double Po, int I)
     else
     {
         Re = 0.92 * Ro - 1.27;
-        // Mo = 20. + 280.0 / exp(0.023 * Po);           // same as Eq. 12 (checked with an example)
-        Mo = 20. + exp(5.6348 - Po / 43.43);
+        Mo = 20. + fast_exp(5.6348 - Po / 43.43);
         if (Po <= 33.){
             B = 100. / (.5 + .3 * Po);
         }
@@ -101,7 +132,7 @@ double DMCcalc(double T, double H, double Ro, double Po, int I)
     if (Pr < 0.)
         Pr = 0.0;
     dmc = Pr + K;
-    if (dmc <= 0.0)
+    if (dmc <= 0.)
         dmc = 0.0;
     
     return dmc;
@@ -117,12 +148,12 @@ double DMCcalc(double T, double H, double Ro, double Po, int I)
 double DCcalc(double T, double Ro, double Do, int I)
 {
     double dc;
-    double Rd, Qo, Qr, V, D, Dr;
+    double Rd, Qo, Qr, V, Dr;
     
     if (Ro > 2.8)
     {
         Rd = 0.83 * (Ro)-1.27;
-        Qo = 800. * exp(-Do / 400.);
+        Qo = 800. * fast_exp_neg(Do / 400.);
         Qr = Qo + 3.937 * Rd;
         Dr = 400. * log(800. / Qr);
         if (Dr > 0.)
@@ -150,10 +181,10 @@ double DCcalc(double T, double Ro, double Do, int I)
 double ISIcalc(double W, double F)   // ATTENTION swap the order of the arguments
 {
     double isi;
-    double Fw, M, Ff, R;
+    double Fw, M, Ff;
     M = 147.2 * (101 - F) / (59.5 + F);
-    Fw = exp(0.05039 * W);
-    Ff = 91.9 * exp(-.1386 * M) * (1. + pow(M, 5.31) / 4.93E7);
+    Fw = fast_exp(0.05039 * W);
+    Ff = 91.9 * fast_exp(-.1386 * M) * (1. + fastPow(M, 5.31) / 4.93E7);
     isi = 0.208 * Fw * Ff;
 
     return isi;
@@ -166,11 +197,10 @@ double ISIcalc(double W, double F)   // ATTENTION swap the order of the argument
 double BUIcalc(double P, double D)
 {
     double bui;
-    double U;
     if (P <= .4 * D)
         bui = 0.8 * P * D / (P + .4 * D);
     else
-        bui = P - (1. - .8 * D / (P + .4 * D)) * (.92 + pow(.0114 * P, 1.7));
+        bui = P - (1. - .8 * D / (P + .4 * D)) * (.92 + fastPow(.0114 * P, 1.7));
     if (bui < 0.0)
         bui = 0.0;
 
@@ -184,14 +214,14 @@ double BUIcalc(double P, double D)
 double FWIcalc(double R,double U)
 {
     double fwi;
-    double Fd, B, S;
+    double Fd, B;
     if (U <= 80.)
-        Fd = .626 * pow(U, .809) + 2.;
+        Fd = .626 * fastPow(U, .809) + 2.;
     else
-        Fd = 1000. / (25. + 108.64 * exp(-.023 * U));
+        Fd = 1000. / (25. + 108.64 * fast_exp_neg(.023 * U));
     B = .1 * R * Fd;
     if (B > 1.)
-        fwi = exp(2.72 * pow(.434 * log(B), .647));
+        fwi = fast_exp(2.72 * fastPow(.434 * log(B), .647));
     else
         fwi = B;
 
@@ -204,17 +234,10 @@ double FWIcalc(double R,double U)
 /*Eq. 30b*/
 
 
-/* Main Program */
-
-
-// void print_FWI(void){
-// 	am_util_stdio_printf("FFMC,\t DMC ,\t DC  ,\t ISI ,\t BUI ,\t FWI\n");
-// 	am_util_stdio_printf("%.2f,\t %.2f,\t %.2f,\t %.2f,\t %.2f,\t %.2f \n\n", ffmc, dmc, dc, isi, bui, fwi);
-// }
-void print_FWI(void){
-    printf("FFMC,\t DMC ,\t DC  ,\t ISI ,\t BUI ,\t FWI\n");
-    printf("%.2f,\t %.2f,\t %.2f,\t %.2f,\t %.2f,\t %.2f \n\n", ffmc, dmc, dc, isi, bui, fwi);
-}
+ void print_FWI(void){
+ 	APP_PRINTF("FFMC,\t DMC ,\t DC  ,\t ISI ,\t BUI ,\t FWI\n");
+ 	APP_PRINTF("%.2f,\t %.2f,\t %.2f,\t %.2f,\t %.2f,\t %.2f \n\n", ffmc, dmc, dc, isi, bui, fwi);
+ }
 
 
 #ifdef __cplusplus

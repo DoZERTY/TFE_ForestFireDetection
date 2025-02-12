@@ -277,24 +277,31 @@ struct bme68x_data *get_BME_data()
 
 double compute_FWI(struct bme68x_data *data)
 {
-	start_cycle_count();
+
 	double temp_value = (double) data->temperature/100.0;
 	double humidity_value = (double) data->humidity/1000.0;
 	double wind = 10;
 	double rain = 0;
 	int I_value = 2;  // because February
-	double ffmc = FFMCcalc(temp_value, humidity_value, wind, rain, ffmc0);
-	double dmc = DMCcalc(temp_value, humidity_value, rain, dmc0, I_value);
-	double dc = DCcalc(temp_value, rain, dc0, I_value);
-	double isi = ISIcalc(wind, ffmc);
-	double bui = BUIcalc(dmc, dc);
-	double fwi = FWIcalc(isi, bui);
+	start_cycle_count();
+	double ffmc = FFMCcalc(temp_value, humidity_value, wind, rain, ffmc0); //stop_cycle_count("FFMC cycle counts");
+	//start_cycle_count();
+	double dmc = DMCcalc(temp_value, humidity_value, rain, dmc0, I_value); //stop_cycle_count("DMC cycle counts");
+	//start_cycle_count();
+	double dc = DCcalc(temp_value, rain, dc0, I_value); //stop_cycle_count("DC cycle counts");
+	//start_cycle_count();
+	double isi = ISIcalc(wind, ffmc); //stop_cycle_count("ISI cycle counts");
+	//start_cycle_count();
+	double bui = BUIcalc(dmc, dc); //stop_cycle_count("BUI cycle counts");
+	//start_cycle_count();
+	double fwi = FWIcalc(isi, bui); //stop_cycle_count("FWI cycle counts");
 
+	stop_cycle_count("Total FWI cycle counts");
 	// update of previous value
 	ffmc0 = ffmc;
 	dmc0 = dmc;
 	dc0 = dc;
-	stop_cycle_count("FWI cycle counts");
+
 
 	return fwi;
 
