@@ -30,5 +30,7 @@ void my_sensor_init_test_dur(I2C_HandleTypeDef *hi2c, uint8_t perform_selftest, 
 /** Fetch new sensor data and returns a pointer to data structure **/
 struct bme68x_data *get_BME_data();
 
+double compute_FWI(struct bme68x_data *data);
+
 
 #endif /* INC_MY_SENSOR_H_ */

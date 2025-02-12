@@ -38,6 +38,9 @@
 #include "subghz_phy_app.h"
 #include "rtc.h"
 #include "my_packet.h"
+
+#include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,7 +77,6 @@ void blink(int);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -209,7 +211,8 @@ void print_int(int my_int){
 		//print_now(charbuffer);
 		debug_print(charbuffer);
 	}
-	print_now("\r\n");
+	//print_now("\r\n");
+	debug_print("\r\n");
 }
 void print_error(char* string, int my_int){
 	print_now(string);
@@ -234,17 +237,26 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	} else if (GPIO_Pin == Button2_Pin) {
 		#if((BTN2ACTION == SENDPACKET) & (!TEST_MODE))
 				//send_dummy_packet();
-//				blink(100);
-//				debug_print("Button 2  .....\r\n");
-//				debug_print("Retrieve BME 680 data ... \r\n");
-//				blink(50);
-//				HAL_Delay(100);
-			while(1){
+				blink(100);
 				bme_data = get_BME_data();
+				debug_print("Retrieve BME 680 data ... \r\n");
+				if (FWI_COMPUTATION){
+					double fwi_value = compute_FWI(bme_data);
+					APP_PRINTF("FWI value is %d...\r\n", (int) fwi_value);
+				}
 				make_packet(bme_data);
+				blink(50);
 				send_packet();
-				HAL_Delay(200);
-			}
+				HAL_Delay(100);
+//			while(1){
+//				bme_data = get_BME_data();
+////				double fwi_value = compute_FWI(bme_data);
+////				printf("FWI value is: %f", fwi_value);
+//
+//				make_packet(bme_data);
+//				send_packet();
+//				HAL_Delay(200);
+//			}
 		#elif((BTN2ACTION == SENDPACKET) & (TEST_MODE))
 			#if (TEST_NUMBER == 0)
 				bme_data = get_BME_data();
@@ -328,35 +340,6 @@ void debug_print(const char* out)
 	APP_PRINTF(out);
 #endif
 }
-
-
-
-
-volatile uint8_t counting_cycles = 0;
-
-void start_cycle_count() {
-	uint32_t prim = __get_PRIMASK();
-	__disable_irq();
-	if (counting_cycles) {
-		APP_PRINTF("Tried re-entrant cycle counting.\r\n");
-		Error_Handler();
-	} else {
-		counting_cycles = 1;
-	}
-	if (!prim) {
-		__enable_irq();
-	}
-	DWT->CTRL |= 1 ; // enable the counter
-	DWT->CYCCNT = 0; // reset the counter
-}
-void stop_cycle_count(char *s) {
-	uint32_t res = DWT->CYCCNT;
-	counting_cycles = 0;
-	print_now("[PERF] ");
-	print_now(s);
-	print_error("Cycles: ", res);
-}
-
 
 /* USER CODE END 4 */
 

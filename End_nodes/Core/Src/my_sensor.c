@@ -9,6 +9,9 @@
 #include "bme68x.h"
 #include "main.h"
 #include "sys_app.h"
+#include "utils.h"
+
+#include "FWI.h"
 
 
 
@@ -270,4 +273,30 @@ struct bme68x_data *get_BME_data()
 #endif
 
 	return &data;
+}
+
+double compute_FWI(struct bme68x_data *data)
+{
+	start_cycle_count();
+	double temp_value = (double) data->temperature/100.0;
+	double humidity_value = (double) data->humidity/1000.0;
+	double wind = 10;
+	double rain = 0;
+	int I_value = 2;  // because February
+	double ffmc = FFMCcalc(temp_value, humidity_value, wind, rain, ffmc0);
+	double dmc = DMCcalc(temp_value, humidity_value, rain, dmc0, I_value);
+	double dc = DCcalc(temp_value, rain, dc0, I_value);
+	double isi = ISIcalc(wind, ffmc);
+	double bui = BUIcalc(dmc, dc);
+	double fwi = FWIcalc(isi, bui);
+
+	// update of previous value
+	ffmc0 = ffmc;
+	dmc0 = dmc;
+	dc0 = dc;
+	stop_cycle_count("FWI cycle counts");
+
+	return fwi;
+
+
 }
