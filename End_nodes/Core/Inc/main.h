@@ -105,7 +105,7 @@ void stop_cycle_count(char *s);
 #define RECEIVEPACKET			1
 #define RXTIMEOUT				180000
 #define BTN2ACTION				SENDPACKET    // modify for the board n°2
-#define FWI_COMPUTATION			1     // if 0: FWI not computed
+#define FWI_COMPUTATION			0     // if 0: FWI not computed
 
 #define TEST_MODE				0       // 0 if no test to be performed, otherwise 1
 #define TEST_NUMBER				2
