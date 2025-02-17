@@ -18,7 +18,7 @@
 #define OS_TEMP		BME68X_OS_8X     //BME68X_OS_4X, previously BME68X_OS_8X
 #define SENSE_GAS	1 // if 0, no heating and no sensing of the gas
 #define HEATR_TEMP	300 // See datasheet, typically between 200 and 400
-#define HEATR_DUR	500 // See datasheet, typically takes 20-30ms to reach target temp
+#define HEATR_DUR	50 // See datasheet, typically takes 20-30ms to reach target temp
 
 /** Initialise the BME680 sensor, after that it is ready to be used **/
 void my_sensor_init(I2C_HandleTypeDef *hi2c, uint8_t perform_sefltest);

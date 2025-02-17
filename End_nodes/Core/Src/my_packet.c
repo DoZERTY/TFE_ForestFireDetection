@@ -11,7 +11,7 @@
 #include "main.h"
 #include "sys_app.h"
 #include "rtc.h"
-
+//#include "radio_driver.c"
 
 uint8_t packet_buffer[PAYLOAD_MAX_LENGTH];
 uint8_t packet_length;
@@ -55,14 +55,19 @@ void make_packet(struct bme68x_data *bme_data)
 
 void send_packet()
 {
-	APP_PRINTF("Sending %d bytes...\r\n", packet_length);
+//	APP_PRINTF("Status Radio: %d \r\n", Radio.GetStatus());
+//	APP_PRINTF("Sending %d bytes...\r\n", packet_length);
 	if(Radio.Send(packet_buffer, packet_length)) {
 		debug_print("Send packet failed.\r\n");
 	}
-//	RadioStandby();
-//	else{
-//		Radio.Standby();          //or        Radio.Sleep();
-//	}
+//	APP_PRINTF("Status Radio: %d \r\n", Radio.GetStatus());
+
+//	HAL_Delay(100);
+//	Radio.Standby();    // Packet not received correctly (just "HDR KO"). With Sleep, I have an CRC error
+//	HAL_Delay(100);
+//	APP_PRINTF("Status Radio is now: %d \r\n", Radio.GetStatus());
+//
+//	Radio.Sleep();   //or        Radio.Sleep();
 }
 
 void send_dummy_packet()

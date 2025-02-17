@@ -124,6 +124,9 @@ int main(void)
   // Init BME680 sensor with or without selftest //
   my_sensor_init(&hi2c1, 0);
   debug_print("My sensor is well initiated !\r\n\n");
+
+  // Low power mode enable
+//  HAL_PWREx_EnableLowPowerRunMode();
   //blink(200);
   /* USER CODE END 2 */
 
@@ -166,7 +169,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_1;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_4;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -237,17 +240,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	} else if (GPIO_Pin == Button2_Pin) {
 		#if((BTN2ACTION == SENDPACKET) & (!TEST_MODE))
 				//send_dummy_packet();
-				blink(100);
+//				blink(100);
 				bme_data = get_BME_data();
-				debug_print("Retrieve BME 680 data ... \r\n");
+//				debug_print("Retrieve BME 680 data ... \r\n");
 				if (FWI_COMPUTATION){
 					double fwi_value = compute_FWI(bme_data);
 					APP_PRINTF("FWI value is %d...\r\n", (int) fwi_value);
 				}
 				make_packet(bme_data);
-				blink(50);
+//				blink(50);
 				send_packet();
-				HAL_Delay(100);
+//				HAL_Delay(100);
 //			while(1){
 //				bme_data = get_BME_data();
 ////				double fwi_value = compute_FWI(bme_data);
