@@ -126,7 +126,7 @@ int main(void)
   debug_print("My sensor is well initiated !\r\n\n");
 
   // Low power mode enable
-//  HAL_PWREx_EnableLowPowerRunMode();
+  HAL_PWREx_EnableLowPowerRunMode();
   //blink(200);
   /* USER CODE END 2 */
 
