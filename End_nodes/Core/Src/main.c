@@ -20,7 +20,6 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
-#include "app_fatfs.h"
 #include "i2c.h"
 #include "usart.h"
 #include "spi.h"
@@ -115,7 +114,6 @@ int main(void)
   MX_ADC_Init();
   MX_TIM1_Init();
   MX_SPI1_Init();
-  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   //blink(1000);
   // Print banner and blink LED //

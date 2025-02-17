@@ -65,12 +65,6 @@ void stop_cycle_count(char *s);
 #define RTC_PREDIV_A ((1<<(15-RTC_N_PREDIV_S))-1)
 #define RTC_N_PREDIV_S 10
 #define RTC_PREDIV_S ((1<<RTC_N_PREDIV_S)-1)
-#define BatExt_CS_Pin GPIO_PIN_8
-#define BatExt_CS_GPIO_Port GPIOB
-#define BatExt_CD_Pin GPIO_PIN_0
-#define BatExt_CD_GPIO_Port GPIOA
-#define BatExt_PWR_Pin GPIO_PIN_4
-#define BatExt_PWR_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_5
 #define LED_GPIO_Port GPIOA
 #define Button1_Pin GPIO_PIN_6
@@ -79,10 +73,6 @@ void stop_cycle_count(char *s);
 #define Button2_Pin GPIO_PIN_7
 #define Button2_GPIO_Port GPIOA
 #define Button2_EXTI_IRQn EXTI9_5_IRQn
-#define BatExt_gain1_Pin GPIO_PIN_10
-#define BatExt_gain1_GPIO_Port GPIOA
-#define BatExt_gain2_Pin GPIO_PIN_11
-#define BatExt_gain2_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 #define VERBOSE					1
