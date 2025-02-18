@@ -75,7 +75,7 @@ void stop_cycle_count(char *s);
 #define Button2_EXTI_IRQn EXTI9_5_IRQn
 
 /* USER CODE BEGIN Private defines */
-#define VERBOSE					1
+#define VERBOSE					0
 
 // RTC must not be at 1 if SEND_SYNC_PACKETS is set (the receiver doesn't sense)
 #define RTC_FETCH_SEND_BME		0

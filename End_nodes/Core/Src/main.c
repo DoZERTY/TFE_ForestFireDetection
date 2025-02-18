@@ -124,8 +124,17 @@ int main(void)
   debug_print("My sensor is well initiated !\r\n\n");
 
   // Low power mode enable
-  HAL_PWREx_EnableLowPowerRunMode();
-  //blink(200);
+//  HAL_PWREx_EnableLowPowerRunMode();
+
+  /*** Suspend the systick before going into the STOP mode***/
+//  HAL_SuspendTick();
+//
+//  /*** Enter the STOP mode ***/
+//  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+
+
+  //
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -167,7 +176,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_1;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_4;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -230,6 +239,12 @@ void blink(int time_ms){
 /* GPIO button press callback */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	/*** Wake-up from STOP mode ***/
+//	  SystemClock_Config();
+//	  HAL_ResumeTick();
+//
+//	  blink(200);
+
 	//debug_print("GPIO EXTI callback - ");
 	if(GPIO_Pin == Button1_Pin) {
 		print_now("Hi Button 1\r\n");
@@ -248,6 +263,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				make_packet(bme_data);
 //				blink(50);
 				send_packet();
+
+				/*** Suspend the systick before going into the STOP mode***/
+//			    HAL_SuspendTick();
+//
+//			    /*** Enter the STOP mode ***/
+//			    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+
 //				HAL_Delay(100);
 //			while(1){
 //				bme_data = get_BME_data();
@@ -263,23 +286,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				bme_data = get_BME_data();
 				make_packet(bme_data);
 				send_packet();
-			#elif (TEST_NUMBER == 1)
+			#elif (TEST_NUMBER == 1)  // TO do multiple times to test the reproducibility   => Can also be used for Exp3
 				int temp;
 				for(temp=200; temp<401; temp+=20){
 					my_sensor_init_test_temp(&hi2c1, 0, temp);
 					bme_data = get_BME_data();
 					make_packet(bme_data);
-					send_packet();
-					HAL_Delay(200);
+//					send_packet();
+					HAL_Delay(30000);    //wait 30s
 				}
 			#elif (TEST_NUMBER == 2)
-				int dur;
-				for(dur=40; dur<251; dur+=20){
-					my_sensor_init_test_dur(&hi2c1, 0, dur);
+				int dur, delta_t;
+				dur = 25;
+				my_sensor_init_test_dur(&hi2c1, 0, dur);
+				for(delta_t=200; delta_t<2510; delta_t+=200){
 					bme_data = get_BME_data();
-					make_packet(bme_data);
-					send_packet();
-					HAL_Delay(10000);
+					HAL_Delay(delta_t);
 				}
 
 			#endif
