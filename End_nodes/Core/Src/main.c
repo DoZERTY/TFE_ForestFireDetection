@@ -76,17 +76,12 @@ void blink(int);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void enter_stop_mode(void) {
-    /*** Suspend the systick before going into the STOP mode ***/
-    HAL_SuspendTick();
+#define SLEEP 0
+#define STOP1 1
+#define STANDBY 2
 
-    /*** Enter the STOP mode ***/
-    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+#define POWER_MODE STANDBY
 
-    /*** Resume the systick after wake-up ***/
-    HAL_ResumeTick();
-    SystemClock_Config();
-}
 /* USER CODE END 0 */
 
 /**
@@ -126,8 +121,6 @@ int main(void)
   MX_TIM1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1_LOW);
-  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 
   //blink(1000);
   // Print banner and blink LED //
@@ -136,7 +129,6 @@ int main(void)
   // Init BME680 sensor with or without selftest //
   my_sensor_init(&hi2c1, 0);
   debug_print("My sensor is well initiateddd !\r\n\n");
-  debug_print("End of instantiation \r\n");
 
   // Low power mode enable
 //  HAL_PWREx_EnableLowPowerRunMode();
@@ -148,12 +140,69 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	#if POWER_MODE == STANDBY
+
+		if (__HAL_PWR_GET_FLAG(PWR_FLAG_SB) != RESET) {
+			// Clear the flags
+			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+			__HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
+
+		} else {
+			// First enter the Standby mode
+			debug_print("Entering Standby mode\r\n");
+
+			HAL_SuspendTick();
+
+			blink(50);
+			HAL_Delay(200);
+			blink(50);
+			HAL_Delay(200);
+			blink(50);
+			HAL_Delay(200);
+
+			// Wakeup configuration
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+
+			// Clear the flag of Wakeup
+			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+
+			// Enter in STANDBY mode
+			HAL_PWR_EnterSTANDBYMode();
+		}
+	#endif
+
   while (1)
   {
     /* USER CODE END WHILE */
     MX_SubGHz_Phy_Process();
 
     /* USER CODE BEGIN 3 */
+	#if POWER_MODE == SLEEP
+  	  HAL_SuspendTick();
+  	  blink(50);
+  	  HAL_Delay(200);
+//  	  HAL_PWR_EnableSleepOnExit ();
+  	  /* Clear the WU FLAG */
+      __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+	  /* clear the RTC Wake UP (WU) flag */
+      __HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
+  	  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+	#endif
+
+	#if POWER_MODE == STOP1
+	  HAL_SuspendTick();
+	  blink(50);
+	  HAL_Delay(200);
+	  blink(50);
+	  HAL_Delay(200);
+	  /* Clear the WU FLAG */
+	  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+      /* clear the RTC Wake UP (WU) flag */
+	  __HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
+	  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+	#endif
+
   }
   /* USER CODE END 3 */
 }
@@ -248,24 +297,24 @@ void blink(int time_ms){
 /* GPIO button press callback */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	#if POWER_MODE == STANDBY
+		/** Disable the WWAKEUP PIN **/
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
+	#endif
 
-	/*** Wake-up from STOP mode ***/
-	SystemClock_Config();
+	SystemClock_Config ();
 	HAL_ResumeTick();
-//
-//	  blink(200);
-
+	blink(50);
 	debug_print("Begin of HAL_GPIO_EXTI_Callback \r\n");
 
 	//debug_print("GPIO EXTI callback - ");
 	if(GPIO_Pin == Button1_Pin) {
 		print_now("Hi Button 1\r\n");
-		//batext_power_on();
-		blink(500);
+		HAL_Delay(2000);
+		blink(5000);
+		HAL_Delay(2000);
 	} else if (GPIO_Pin == Button2_Pin) {
 		#if((BTN2ACTION == SENDPACKET) & (!TEST_MODE))
-				//send_dummy_packet();
-//				blink(100);
 				bme_data = get_BME_data();
 				debug_print("Retrieve BME 680 data ... \r\n");
 				if (FWI_COMPUTATION){
@@ -273,17 +322,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 					APP_PRINTF("FWI value is %d...\r\n", (int) fwi_value);
 				}
 				make_packet(bme_data);
-//				blink(50);
 				send_packet();
-//			while(1){
-//				bme_data = get_BME_data();
-////				double fwi_value = compute_FWI(bme_data);
-////				printf("FWI value is: %f", fwi_value);
-//
-//				make_packet(bme_data);
-//				send_packet();
-//				HAL_Delay(200);
-//			}
+				HAL_Delay(2000);
+
 		#elif((BTN2ACTION == SENDPACKET) & (TEST_MODE))
 			#if (TEST_NUMBER == 0)
 				bme_data = get_BME_data();
@@ -314,15 +355,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				Radio.Rx(RXTIMEOUT);
 				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 		#endif
-
-		HAL_SuspendTick();
-//		HAL_PWR_EnableWakeUpPin(GPIO_Pin);
-//		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-		HAL_PWREx_EnterSTOP0Mode(PWR_STOPENTRY_WFI);
-
-//		HAL_GPIO_EXTI_IRQHandler(GPIO_Pin);
-//		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-
 
 	} else {
 		debug_print("other?\r\n");
