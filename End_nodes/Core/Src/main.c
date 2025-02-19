@@ -76,6 +76,17 @@ void blink(int);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void enter_stop_mode(void) {
+    /*** Suspend the systick before going into the STOP mode ***/
+    HAL_SuspendTick();
+
+    /*** Enter the STOP mode ***/
+    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+    /*** Resume the systick after wake-up ***/
+    HAL_ResumeTick();
+    SystemClock_Config();
+}
 /* USER CODE END 0 */
 
 /**
@@ -115,22 +126,20 @@ int main(void)
   MX_TIM1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1_LOW);
+  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+
   //blink(1000);
   // Print banner and blink LED //
   debug_print("\nBonjour Brock !\r\n");
 
   // Init BME680 sensor with or without selftest //
   my_sensor_init(&hi2c1, 0);
-  debug_print("My sensor is well initiated !\r\n\n");
+  debug_print("My sensor is well initiateddd !\r\n\n");
+  debug_print("End of instantiation \r\n");
 
   // Low power mode enable
 //  HAL_PWREx_EnableLowPowerRunMode();
-
-  /*** Suspend the systick before going into the STOP mode***/
-//  HAL_SuspendTick();
-//
-//  /*** Enter the STOP mode ***/
-//  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
 
 
@@ -239,11 +248,14 @@ void blink(int time_ms){
 /* GPIO button press callback */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+
 	/*** Wake-up from STOP mode ***/
-//	  SystemClock_Config();
-//	  HAL_ResumeTick();
+	SystemClock_Config();
+	HAL_ResumeTick();
 //
 //	  blink(200);
+
+	debug_print("Begin of HAL_GPIO_EXTI_Callback \r\n");
 
 	//debug_print("GPIO EXTI callback - ");
 	if(GPIO_Pin == Button1_Pin) {
@@ -255,7 +267,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				//send_dummy_packet();
 //				blink(100);
 				bme_data = get_BME_data();
-//				debug_print("Retrieve BME 680 data ... \r\n");
+				debug_print("Retrieve BME 680 data ... \r\n");
 				if (FWI_COMPUTATION){
 					double fwi_value = compute_FWI(bme_data);
 					APP_PRINTF("FWI value is %d...\r\n", (int) fwi_value);
@@ -263,15 +275,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				make_packet(bme_data);
 //				blink(50);
 				send_packet();
-
-				/*** Suspend the systick before going into the STOP mode***/
-//			    HAL_SuspendTick();
-//
-//			    /*** Enter the STOP mode ***/
-//			    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-
-
-//				HAL_Delay(100);
 //			while(1){
 //				bme_data = get_BME_data();
 ////				double fwi_value = compute_FWI(bme_data);
@@ -312,10 +315,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 		#endif
 
+		HAL_SuspendTick();
+//		HAL_PWR_EnableWakeUpPin(GPIO_Pin);
+//		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+		HAL_PWREx_EnterSTOP0Mode(PWR_STOPENTRY_WFI);
+
+//		HAL_GPIO_EXTI_IRQHandler(GPIO_Pin);
+//		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+
 
 	} else {
 		debug_print("other?\r\n");
 	}
+
+	debug_print("End of HAL_GPIO_EXTI_Callback \r\n");
 }
 
 
